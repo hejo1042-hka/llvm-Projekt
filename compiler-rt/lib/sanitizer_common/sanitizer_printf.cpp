@@ -314,6 +314,18 @@ void Printf(const char *format, ...) {
   va_list args;
   va_start(args, format);
   SharedPrintfCode(false, format, args);
+
+  // TODO log in file??
+  // pthread_mutex_lock(&lock);
+  // log_file = fopen("tsan.log", "a");
+  // if (log_file != NULL) {
+  //   char buffer[500];
+  //   sprintf(buffer, format, args);
+  //   fprintf(log_file, buffer);
+  //   fclose(log_file);
+  // }
+  // pthread_mutex_unlock(&lock);
+
   va_end(args);
 }
 

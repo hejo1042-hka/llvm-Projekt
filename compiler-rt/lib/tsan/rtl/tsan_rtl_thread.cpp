@@ -12,6 +12,7 @@
 
 #include "sanitizer_common/sanitizer_placement_new.h"
 #include "tsan_rtl.h"
+#include "log.h"
 #include "tsan_mman.h"
 #include "tsan_platform.h"
 #include "tsan_report.h"
@@ -129,6 +130,9 @@ Tid ThreadCreate(ThreadState *thr, uptr pc, uptr uid, bool detached) {
   }
   Tid tid = ctx->thread_registry.CreateThread(uid, detached, parent, &arg);
   DPrintf("#%d: ThreadCreate tid=%d uid=%zu\n", parent, tid, uid);
+  #ifdef LOG_THREAD_FORK
+    Printf("Thread %d | f(%d)\n", parent, tid);
+  #endif
   return tid;
 }
 
@@ -215,6 +219,9 @@ void ThreadContext::OnStarted(void *arg) {
 
 void ThreadFinish(ThreadState *thr) {
   DPrintf("#%d: ThreadFinish\n", thr->tid);
+  #ifdef LOG_THREAD_FINISHED
+    Printf("%d Finished\n", thr->fast_state.sid());
+  #endif
   ThreadCheckIgnore(thr);
   if (thr->stk_addr && thr->stk_size)
     DontNeedShadowFor(thr->stk_addr, thr->stk_size);
@@ -295,6 +302,9 @@ struct JoinArg {
 void ThreadJoin(ThreadState *thr, uptr pc, Tid tid) {
   CHECK_GT(tid, 0);
   DPrintf("#%d: ThreadJoin tid=%d\n", thr->tid, tid);
+  #ifdef LOG_THREAD_JOIN
+    Printf("Thread %d | j(%d) \n", thr->tid, tid);
+  #endif
   JoinArg arg = {};
   ctx->thread_registry.JoinThread(tid, &arg);
   if (!thr->ignore_sync) {

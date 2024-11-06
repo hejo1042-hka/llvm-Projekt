@@ -14,11 +14,12 @@
 #include <sanitizer_common/sanitizer_stackdepot.h>
 
 #include "tsan_rtl.h"
+#include "log.h"
 #include "tsan_flags.h"
-#include "tsan_sync.h"
+#include "tsan_platform.h"
 #include "tsan_report.h"
 #include "tsan_symbolize.h"
-#include "tsan_platform.h"
+#include "tsan_sync.h"
 
 namespace __tsan {
 
@@ -67,6 +68,9 @@ static void ReportMutexMisuse(ThreadState *thr, uptr pc, ReportType typ,
 
 static void RecordMutexLock(ThreadState *thr, uptr pc, uptr addr,
                             StackID stack_id, bool write) {
+  #ifdef LOG_MUTEX_LOCK_UNLOCK
+    PrintFileAndLine(thr, pc, "l", addr);
+  #endif
   auto typ = write ? EventType::kLock : EventType::kRLock;
   // Note: it's important to trace before modifying mutex set
   // because tracing can switch trace part and we write the current
@@ -215,6 +219,10 @@ void MutexPostLock(ThreadState *thr, uptr pc, uptr addr, u32 flagz, int rec) {
 
 int MutexUnlock(ThreadState *thr, uptr pc, uptr addr, u32 flagz) {
   DPrintf("#%d: MutexUnlock %zx flagz=0x%x\n", thr->tid, addr, flagz);
+  #ifdef LOG_MUTEX_LOCK_UNLOCK
+    PrintFileAndLine(thr, pc, "u", addr);
+  #endif
+
   if (pc && IsAppMem(addr))
     MemoryAccess(thr, pc, addr, 1, kAccessRead | kAccessAtomic);
   StackID creation_stack_id;

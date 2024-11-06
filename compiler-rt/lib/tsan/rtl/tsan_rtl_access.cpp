@@ -12,6 +12,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "tsan_rtl.h"
+#include "log.h"
+#include "tsan_interface.h"
 
 namespace __tsan {
 
@@ -420,6 +422,18 @@ NOINLINE void TraceRestartMemoryAccess(ThreadState* thr, uptr pc, uptr addr,
 ALWAYS_INLINE USED void MemoryAccess(ThreadState* thr, uptr pc, uptr addr,
                                      uptr size, AccessType typ) {
   RawShadow* shadow_mem = MemToShadow(addr);
+
+  if (typ == kAccessWrite) {
+  #ifdef LOG_THREAD_ON_WRITE
+    PrintFileAndLine(thr, pc, "wr", addr);
+  #endif
+  } else if (typ == kAccessRead) {
+  #ifdef LOG_THREAD_ON_READ
+    PrintFileAndLine(thr, pc, "rd", addr);
+    // Printf("\n"); TODO??
+  #endif
+  }
+
   UNUSED char memBuf[4][64];
   DPrintf2("#%d: Access: %d@%d %p/%zd typ=0x%x {%s, %s, %s, %s}\n", thr->tid,
            static_cast<int>(thr->fast_state.sid()),

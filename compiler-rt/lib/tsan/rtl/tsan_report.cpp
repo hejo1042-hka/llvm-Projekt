@@ -16,6 +16,7 @@
 #include "sanitizer_common/sanitizer_placement_new.h"
 #include "sanitizer_common/sanitizer_report_decorator.h"
 #include "sanitizer_common/sanitizer_stacktrace_printer.h"
+#include "log.h"
 
 namespace __tsan {
 
@@ -115,6 +116,26 @@ void PrintStack(const ReportStack *ent) {
     Printf("%s\n", res.data());
   }
   Printf("\n");
+}
+
+void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const char* action, uptr addr) {
+  if (ent == 0 || ent->frames == 0) {
+    Printf("[failed to restore the stack]");
+  }
+  SymbolizedStack *frame = ent->frames;
+  InternalScopedString res;
+
+  StackTracePrinter::GetOrInit()->RenderFrame(
+      &res, "%s:%l", 0, frame->info.address, &frame->info,
+              common_flags()->symbolize_vs_style,
+              common_flags()->strip_path_prefix);
+
+#ifdef LOG_THREAD_EPOCH
+  Printf("Thread %d | %s(%p) | %s | %u\n", thr->tid, action, (void *)addr,  res.data(), thr->fast_state.epoch());
+#else
+  Printf("Thread %d | %s(%p) | %s\n", thr->tid, action, (void *)addr,  res.data());
+#endif
+
 }
 
 static void PrintMutexSet(Vector<ReportMopMutex> const& mset) {
@@ -280,6 +301,7 @@ static const SymbolizedStack *SkipTsanInternalFrames(SymbolizedStack *frames) {
 }
 
 void PrintReport(const ReportDesc *rep) {
+#ifdef ENABLE_TSAN_DEFAULT_OUTPUT
   Decorator d;
   Printf("==================\n");
   const char *rep_typ_str = ReportTypeString(rep->typ, rep->tag);
@@ -358,6 +380,7 @@ void PrintReport(const ReportDesc *rep) {
     DumpProcessMap();
 
   Printf("==================\n");
+#endif
 }
 
 #else  // #if !SANITIZER_GO
@@ -376,6 +399,10 @@ void PrintStack(const ReportStack *ent) {
            StripPathPrefix(info.file, common_flags()->strip_path_prefix),
            info.line, info.module_offset);
   }
+}
+
+void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const char* action, uptr addr)
+  Printf("Not implemented for Go\n");
 }
 
 static void PrintMop(const ReportMop *mop, bool first) {
