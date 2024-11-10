@@ -430,7 +430,6 @@ ALWAYS_INLINE USED void MemoryAccess(ThreadState* thr, uptr pc, uptr addr,
   } else if (typ == kAccessRead) {
   #ifdef LOG_THREAD_ON_READ
     PrintFileAndLine(thr, pc, "rd", addr);
-    // Printf("\n"); TODO??
   #endif
   }
 
