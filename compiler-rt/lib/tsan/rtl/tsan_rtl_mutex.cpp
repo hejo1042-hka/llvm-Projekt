@@ -69,7 +69,7 @@ static void ReportMutexMisuse(ThreadState *thr, uptr pc, ReportType typ,
 static void RecordMutexLock(ThreadState *thr, uptr pc, uptr addr,
                             StackID stack_id, bool write) {
   #ifdef LOG_MUTEX_LOCK_UNLOCK
-    PrintFileAndLine(thr, pc, "l", addr);
+    PrintFileAndLine(thr, pc, "acq", addr);
   #endif
   auto typ = write ? EventType::kLock : EventType::kRLock;
   // Note: it's important to trace before modifying mutex set
@@ -220,7 +220,7 @@ void MutexPostLock(ThreadState *thr, uptr pc, uptr addr, u32 flagz, int rec) {
 int MutexUnlock(ThreadState *thr, uptr pc, uptr addr, u32 flagz) {
   DPrintf("#%d: MutexUnlock %zx flagz=0x%x\n", thr->tid, addr, flagz);
   #ifdef LOG_MUTEX_LOCK_UNLOCK
-    PrintFileAndLine(thr, pc, "u", addr);
+    PrintFileAndLine(thr, pc, "rel", addr);
   #endif
 
   if (pc && IsAppMem(addr))

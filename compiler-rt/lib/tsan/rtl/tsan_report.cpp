@@ -130,7 +130,7 @@ void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const cha
               common_flags()->symbolize_vs_style,
               common_flags()->strip_path_prefix);
 
-  Printf("Thread %d | %s(%p) | %s\n", thr->tid, action, (void *)addr,  res.data());
+  Printf("T%d|%s(%p)|%s\n", thr->tid, action, (void *)addr,  res.data());
 }
 
 void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr,
@@ -146,7 +146,7 @@ void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr,
               common_flags()->symbolize_vs_style,
               common_flags()->strip_path_prefix);
 
-  Printf("Thread %d | %s(T%d) | %s\n", thr->tid, action, thread, res.data());
+  Printf("T%d|%s(T%d)|%s\n", thr->tid, action, thread, res.data());
 }
 
 static void PrintMutexSet(Vector<ReportMopMutex> const& mset) {
