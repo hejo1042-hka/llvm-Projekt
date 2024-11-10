@@ -790,9 +790,13 @@ int Finalize(ThreadState *thr) {
   if (ctx->nreported) {
     failed = true;
 #if !SANITIZER_GO
+#ifdef ENABLE_TSAN_DEFAULT_OUTPUT
     Printf("ThreadSanitizer: reported %d warnings\n", ctx->nreported);
+#endif
 #else
+#ifdef ENABLE_TSAN_DEFAULT_OUTPUT
     Printf("Found %d data race(s)\n", ctx->nreported);
+#endif
 #endif
   }
 

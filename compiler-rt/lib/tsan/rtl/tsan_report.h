@@ -130,6 +130,13 @@ void PrintFileAndLineOfStack(
   uptr addr
 );
 
+void PrintFileAndLineOfStackForThread(
+  const ReportStack *ent,
+  ThreadState *thr,
+  const char* action,
+  Tid thread
+);
+
 }  // namespace __tsan
 
 #endif  // TSAN_REPORT_H

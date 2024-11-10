@@ -131,7 +131,11 @@ Tid ThreadCreate(ThreadState *thr, uptr pc, uptr uid, bool detached) {
   Tid tid = ctx->thread_registry.CreateThread(uid, detached, parent, &arg);
   DPrintf("#%d: ThreadCreate tid=%d uid=%zu\n", parent, tid, uid);
   #ifdef LOG_THREAD_FORK
-    Printf("Thread %d | f(%d)\n", parent, tid);
+  if (thr) {
+    PrintFileAndLineForThread(thr, pc, "f", tid);
+  } else {
+    Printf("Thread -1 | f(0) |\n");
+  }
   #endif
   return tid;
 }
@@ -303,7 +307,7 @@ void ThreadJoin(ThreadState *thr, uptr pc, Tid tid) {
   CHECK_GT(tid, 0);
   DPrintf("#%d: ThreadJoin tid=%d\n", thr->tid, tid);
   #ifdef LOG_THREAD_JOIN
-    Printf("Thread %d | j(%d) \n", thr->tid, tid);
+    PrintFileAndLineForThread(thr, pc, "j", tid);
   #endif
   JoinArg arg = {};
   ctx->thread_registry.JoinThread(tid, &arg);
