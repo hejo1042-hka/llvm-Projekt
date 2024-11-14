@@ -20,5 +20,6 @@
 #define LOG_MUTEX_LOCK_UNLOCK
 #define LOG_THREAD_JOIN
 #define LOG_THREAD_FORK
+// #define LOG_CALL_STACK
 
 #endif //TSAN_LOG_H

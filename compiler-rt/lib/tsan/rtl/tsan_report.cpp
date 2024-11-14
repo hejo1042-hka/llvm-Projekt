@@ -131,6 +131,18 @@ void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const cha
               common_flags()->strip_path_prefix);
 
   Printf("T%d|%s(%p)|%s\n", thr->tid, action, (void *)addr,  res.data());
+
+#ifdef LOG_CALL_STACK
+  frame = frame->next;
+  for (int i = 1; frame && frame->info.address; frame = frame->next, i++) {
+    InternalScopedString internal_res;
+    StackTracePrinter::GetOrInit()->RenderFrame(
+        &internal_res, "%s:%l", 0, frame->info.address, &frame->info,
+                common_flags()->symbolize_vs_style,
+                common_flags()->strip_path_prefix);
+    Printf("\t\t%s\n", internal_res.data());
+  }
+#endif
 }
 
 void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr,
@@ -147,6 +159,18 @@ void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr,
               common_flags()->strip_path_prefix);
 
   Printf("T%d|%s(T%d)|%s\n", thr->tid, action, thread, res.data());
+
+#ifdef LOG_CALL_STACK
+  frame = frame->next;
+  for (int i = 1; frame && frame->info.address; frame = frame->next, i++) {
+    InternalScopedString internal_res;
+    StackTracePrinter::GetOrInit()->RenderFrame(
+        &internal_res, "%s:%l", 0, frame->info.address, &frame->info,
+                common_flags()->symbolize_vs_style,
+                common_flags()->strip_path_prefix);
+    Printf("\t\t%s\n", internal_res.data());
+  }
+#endif
 }
 
 static void PrintMutexSet(Vector<ReportMopMutex> const& mset) {

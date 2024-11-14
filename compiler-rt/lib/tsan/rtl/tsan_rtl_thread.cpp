@@ -131,10 +131,9 @@ Tid ThreadCreate(ThreadState *thr, uptr pc, uptr uid, bool detached) {
   Tid tid = ctx->thread_registry.CreateThread(uid, detached, parent, &arg);
   DPrintf("#%d: ThreadCreate tid=%d uid=%zu\n", parent, tid, uid);
   #ifdef LOG_THREAD_FORK
+  // only log "real" forks and skip the fork of our main Thread from the system
   if (thr) {
     PrintFileAndLineForThread(thr, pc, "fork", tid);
-  } else { // this is necessary because the thr is null
-    Printf("T-1|fork(T0)|\n");
   }
   #endif
   return tid;
