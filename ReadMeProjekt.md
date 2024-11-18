@@ -43,5 +43,6 @@ In order to compile your program with TSan enabled, you have two options.
 2. `mkdir build && cd build`
 3. `cmake path/to/source`
 4. `make`
-5. Run your programm with `./program_name_sanitized 2>log.txt`, which will write the TSan output into `log.txt`
+5. Run your program with `TSAN_OPTIONS="log_path=logFile.txt" ./program_name_sanitized`. This will run your program and write all the TSan log messages in the file logFile.txt.pid. pid is the process id.
+5.1. Run your programm with `./program_name_sanitized 2>log.txt`, which will write the TSan output into `log.txt` You can also run it with `./program_name_sanitized` this will print all log infos to the console. This is not recommend because this will interfere with all the things printed to the console by your program.
 6. Open the log file `log.txt` to analyze the TSan output
