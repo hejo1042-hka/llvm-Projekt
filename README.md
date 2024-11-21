@@ -75,7 +75,7 @@ More information about llvm and the build flags can be found [here](https://llvm
 
 In order to compile your program with TSan enabled, you have two options.
 
-### Option 1 (CMake)
+### CMake
 
 1. Add the following to the cmake file of your program:
 
