@@ -858,9 +858,6 @@ static void ForkAfter(ThreadState* thr,
 void ForkParentAfter(ThreadState* thr, uptr pc) { ForkAfter(thr, false); }
 
 void ForkChildAfter(ThreadState* thr, uptr pc, bool start_thread) {
-  #ifdef LOG_THREAD_FORK
-    Printf("Thread %d: Forked by thread %d\n", thr->tid, pc);
-  #endif
   ForkAfter(thr, true);
   u32 nthread = ctx->thread_registry.OnFork(thr->tid);
   VPrintf(1,
