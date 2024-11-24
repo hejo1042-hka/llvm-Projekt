@@ -6,10 +6,10 @@ This is the documentation for the Projektarbeit "ThreadSanitizer - Trace Generie
 The first part of the current project was to update the code of Martin Glauner and Julian Aßmann to the current llvm-project state. That was necessary because in the time after they finished their project and the current time, some updates happened. Especially the update of the virtual memory address randomization, that now uses more bits than at the time of the project from Martin Glauner and Julian Aßmann. Since TSan is using these addresses, but was not updated to the most recent version it could not work with the longer randomized addresses. More information to this problem can be found [here](https://github.com/google/sanitizers/issues/1716) and [here](https://stackoverflow.com/questions/77850769/fatal-threadsanitizer-unexpected-memory-mapping-when-running-on-linux-kernels).
 Therefore, I took all the important parts, that Martin Glauner and Julian Aßmann already provided with their code and added those to the current version of the llvm project.
 1. This includes the file [log.h](compiler-rt/lib/tsan/rtl/log.h) where you can comment in and out the lines, that define what actions shall be logged.
-2. In the file [tsan_report.cpp](compiler-rt/lib/tsan/rtl/tsan_report.cpp) a method was added to print the log messages.
-3. In [tsan_rtl_thread.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_thread.cpp) the fork(s) and join(s) of threads are registered and then logged.
-4. The file [tsan_rtl_mutex.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_mutex.cpp) is responsible for registering and logging the lock and unlock events for mutexes.
-5. In the file [tsan_rtl_access.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_access.cpp) all read and write events to memory location are captured and then logged.
+2. In the file [tsan_report.cpp](compiler-rt/lib/tsan/rtl/tsan_report.cpp) a method ```PrintFileAndLine``` was added to print the log messages.
+3. In [tsan_rtl_thread.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_thread.cpp) the fork(s) and join(s) of threads are registered and then logged. The fork and join happens in the methods ```ThreadCreate``` and ```ThreadJoin```.
+4. The file [tsan_rtl_mutex.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_mutex.cpp) is responsible for registering and logging the lock and unlock events for mutexes. These events are logged from the Methods ```RecordMutexLock``` and ```MutexUnlock```
+5. In the file [tsan_rtl_access.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_access.cpp) all read and write events to memory location are captured and then logged. Both read and write events are logged from the ```MemoryAccess``` Method.
 6. In the file [tsan_rtl_report.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_report.cpp) a method ```PrintFileAndLine``` was added, which is used by most of the added logging functionality to generate and write the actual log message.
 
 ## further improvements
@@ -44,7 +44,17 @@ Some improvements were made to the original code from Martin Glauner and Julian 
 
 ## analyze runtime 
 
-The idea here is to check, how much longer it takes TSan to run a programm, when the source code location is printed with the whole path to the file compared to when only a short number (hash) is printed.
+The idea here is to check, how much longer it takes TSan to run a programm, when the source code location is printed with the whole path to the file compared to when only a short number (hash) is printed. To test the runtime improvement with a hash of the source location, a fixed number (123) was used.
+
+To get an average time each tested program was run 4 times. The tested programs where:
+- [tiny_race](examples/tiny_race.cc)
+- [mutex_test](examples/tiny_race.cc)
+- [locking_example](examples/locking_example.cc)
+- [mini_bench_local](examples/mini_bench_local.cpp)
+- [start_many_threads](examples/start_many_threads.cpp)
+- [mini_bench_shared](examples/mini_bench_shared.cpp)
+
+The exact results of the test runs can be found in the file [result.md](examples/measurement/result.md). The measurements resulted only in a very minor increase of runtime, when only a fixed number was printed instead of the whole source location. In both cases, the source location has to be calculated, in one case only the printed statement is shorter. To account for the fact, that even when a hash of the position is printed, the location itself has to be calculated, the part of the code, that calculates the source code position was executed. This code fragment can be found in [tsan_report.cpp line 128](compiler-rt/lib/tsan/rtl/tsan_report.cpp) and in [tsan_report.cpp line 156](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
 
 ## How to use it
 

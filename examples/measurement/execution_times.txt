@@ -1,0 +1,23 @@
+Execution Time Measurements (in nanoseconds) writing exact source location:
+tiny_race_sanitized - Average Time: 1826626830 nanoseconds total: 7306507321
+mutex_test_sanitized - Average Time: 716803717 nanoseconds total: 2867214869
+locking_example_sanitized - Average Time: 816602994 nanoseconds total: 3266411977
+mini_bench_local_sanitized - Average Time: 15095990192 nanoseconds total: 60383960770
+start_many_threads_sanitized - Average Time: 812918887 nanoseconds total: 3251675549
+mini_bench_shared_sanitized - Average Time: 14536261936 nanoseconds total: 58145047744
+
+Execution Time Measurements (in nanoseconds) writing fixed source location (123):
+tiny_race_sanitized - Average Time: 1822252511 nanoseconds total: 7289010044
+mutex_test_sanitized - Average Time: 727468271 nanoseconds total: 2909873085
+locking_example_sanitized - Average Time: 820139131 nanoseconds total: 3280556525
+mini_bench_local_sanitized - Average Time: 15063655025 nanoseconds total: 60254620100
+start_many_threads_sanitized - Average Time: 875231893 nanoseconds total: 3500927575
+mini_bench_shared_sanitized - Average Time: 14802770866 nanoseconds total: 59211083466
+
+Execution Time Measurements (in nanoseconds) without sanitization:
+tiny_race - Average Time: 1010202251 nanoseconds total: 4040809007
+mutex_test - Average Time: 10889846 nanoseconds total: 43559386
+locking_example - Average Time: 7278513 nanoseconds total: 29114055
+mini_bench_local - Average Time: 8999076 nanoseconds total: 35996307
+start_many_threads - Average Time: 16017213 nanoseconds total: 64068854
+mini_bench_shared - Average Time: 7335853 nanoseconds total: 29343415

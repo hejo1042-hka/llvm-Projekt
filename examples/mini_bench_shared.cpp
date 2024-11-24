@@ -7,7 +7,7 @@
 int len;
 int *a;
 //const int kNumIter = 1000;
-const int kNumIter = 10;
+const int kNumIter = 100;
 
 __attribute__((noinline))
 void Run(int idx) {
