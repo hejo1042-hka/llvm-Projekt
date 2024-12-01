@@ -440,6 +440,10 @@ void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const cha
   Printf("Not implemented for Go\n");
 }
 
+void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr, const char* action, Tid thread) {
+  Printf("Not implemented for Go\n");
+}
+
 static void PrintMop(const ReportMop *mop, bool first) {
   Printf("\n");
   Printf("%s at %p by ",
