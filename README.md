@@ -56,6 +56,18 @@ To get an average time each tested program was run 4 times. The tested programs 
 
 The exact results of the test runs can be found in the file [result.md](examples/measurement/result.md). The measurements resulted only in a very minor increase of runtime, when only a fixed number was printed instead of the whole source location. In both cases, the source location has to be calculated, in one case only the printed statement is shorter. To account for the fact, that even when a hash of the position is printed, the location itself has to be calculated, the part of the code, that calculates the source code position was executed. This code fragment can be found in [tsan_report.cpp line 128](compiler-rt/lib/tsan/rtl/tsan_report.cpp) and in [tsan_report.cpp line 156](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
 
+### Execution Time Measurements (Average Time in Nanoseconds)
+
+| Test Case                         | Exact Source Location | Fixed Source Location (123) | Without Sanitization |
+|-----------------------------------|----------------------:|----------------------------:|---------------------:|
+| **tiny_race**                     |         1.826.626.830 |               1.822.252.511 |        1.010.202.251 |
+| **mutex_test**                    |           716.803.717 |                 727.468.271 |           10.889.846 |
+| **locking_example**               |           816.602.994 |                 820.139.131 |            7.278.513 |
+| **mini_bench_local**              |        15.095.990.192 |              15.063.655.025 |            8.999.076 |
+| **start_many_threads**            |           812.918.887 |                 875.231.893 |           16.017.213 |
+| **mini_bench_shared**             |        14.536.261.936 |              14.802.770.866 |            7.335.853 |
+
+
 ## How to use it
 
 ## Requirements
