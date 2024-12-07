@@ -6,6 +6,14 @@ programs=(
     "start_many_threads_sanitized"
     "mini_bench_shared_sanitized"
 )
+#programs=(
+#    "tiny_race"
+#    "mutex_test"
+#    "locking_example"
+#    "mini_bench_local"
+#    "start_many_threads"
+#    "mini_bench_shared"
+#)
 
 number_runs=4
 

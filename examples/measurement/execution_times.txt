@@ -44,4 +44,20 @@ mutex_test_sanitized - Average Time: 401925724 nanoseconds, Total Time: 16077028
 locking_example_sanitized - Average Time: 464736824 nanoseconds, Total Time: 1858947296 nanoseconds, Average Lines Written: 34 lines
 mini_bench_local_sanitized - Average Time: 13779822959 nanoseconds, Total Time: 55119291838 nanoseconds, Average Lines Written: 80417 lines
 start_many_threads_sanitized - Average Time: 449005205 nanoseconds, Total Time: 1796020820 nanoseconds, Average Lines Written: 504 lines
-mini_bench_shared_sanitized - Average Time: 14772432203 nanoseconds, Total Time: 59089728812 nanoseconds, Average Lines Written: 80666 lines
+mini_bench_shared_sanitized - Average Time: 14772432203 nanoseconds, Total Time: 59089728812 nanoseconds, Average Lines Written: 80684 lines
+
+Execution Time Measurements (in nanoseconds) default TSAN output:
+tiny_race_sanitized - Average Time: 1460940819 nanoseconds, Total Time: 5843763277 nanoseconds, Average Lines Written: 67 lines
+mutex_test_sanitized - Average Time: 390576568 nanoseconds, Total Time: 1562306272 nanoseconds, Average Lines Written: 36 lines
+locking_example_sanitized - Average Time: 445588896 nanoseconds, Total Time: 1782355585 nanoseconds, Average Lines Written: 46 lines
+mini_bench_local_sanitized - Average Time: 39493128 nanoseconds, Total Time: 157972515 nanoseconds, Average Lines Written: 0 lines
+start_many_threads_sanitized - Average Time: 69409787 nanoseconds, Total Time: 277639151 nanoseconds, Average Lines Written: 0 lines
+mini_bench_shared_sanitized - Average Time: 39668881 nanoseconds, Total Time: 158675527 nanoseconds, Average Lines Written: 0 lines
+
+Execution Time Measurements (in nanoseconds) with TSAN disabled:
+tiny_race - Average Time: 1010253859 nanoseconds, Total Time: 4041015437 nanoseconds, Average Lines Written: 0 lines
+mutex_test - Average Time: 5785554 nanoseconds, Total Time: 23142217 nanoseconds, Average Lines Written: 0 lines
+locking_example - Average Time: 5375015 nanoseconds, Total Time: 21500063 nanoseconds, Average Lines Written: 0 lines
+mini_bench_local - Average Time: 6499689 nanoseconds, Total Time: 25998758 nanoseconds, Average Lines Written: 0 lines
+start_many_threads - Average Time: 10427980 nanoseconds, Total Time: 41711920 nanoseconds, Average Lines Written: 0 lines
+mini_bench_shared - Average Time: 3839314 nanoseconds, Total Time: 15357258 nanoseconds, Average Lines Written: 0 lines
