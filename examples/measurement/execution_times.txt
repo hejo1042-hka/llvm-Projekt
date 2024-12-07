@@ -21,3 +21,27 @@ locking_example - Average Time: 7278513 nanoseconds total: 29114055
 mini_bench_local - Average Time: 8999076 nanoseconds total: 35996307
 start_many_threads - Average Time: 16017213 nanoseconds total: 64068854
 mini_bench_shared - Average Time: 7335853 nanoseconds total: 29343415
+
+Execution Time Measurements (in nanoseconds) writing exact source location:
+tiny_race_sanitized - Average Time: 1832168491 nanoseconds, Total Time: 7328673966 nanoseconds, Average Lines Written: 71 lines
+mutex_test_sanitized - Average Time: 740302229 nanoseconds, Total Time: 2961208918 nanoseconds, Average Lines Written: 40 lines
+locking_example_sanitized - Average Time: 838791299 nanoseconds, Total Time: 3355165197 nanoseconds, Average Lines Written: 34 lines
+mini_bench_local_sanitized - Average Time: 14239088413 nanoseconds, Total Time: 56956353655 nanoseconds, Average Lines Written: 80417 lines
+start_many_threads_sanitized - Average Time: 823809125 nanoseconds, Total Time: 3295236500 nanoseconds, Average Lines Written: 504 lines
+mini_bench_shared_sanitized - Average Time: 14501687818 nanoseconds, Total Time: 58006751274 nanoseconds, Average Lines Written: 80684 lines
+
+Execution Time Measurements (in nanoseconds) writing fixed source location (123):
+tiny_race_sanitized - Average Time: 1825988269 nanoseconds, Total Time: 7303953079 nanoseconds, Average Lines Written: 71 lines
+mutex_test_sanitized - Average Time: 723422837 nanoseconds, Total Time: 2893691349 nanoseconds, Average Lines Written: 40 lines
+locking_example_sanitized - Average Time: 820420049 nanoseconds, Total Time: 3281680198 nanoseconds, Average Lines Written: 34 lines
+mini_bench_local_sanitized - Average Time: 14138933685 nanoseconds, Total Time: 56555734743 nanoseconds, Average Lines Written: 80417 lines
+start_many_threads_sanitized - Average Time: 824144521 nanoseconds, Total Time: 3296578085 nanoseconds, Average Lines Written: 504 lines
+mini_bench_shared_sanitized - Average Time: 14181331147 nanoseconds, Total Time: 56725324591 nanoseconds, Average Lines Written: 80684 lines
+
+Execution Time Measurements (in nanoseconds) writing no source location:
+tiny_race_sanitized - Average Time: 1482788721 nanoseconds, Total Time: 5931154886 nanoseconds, Average Lines Written: 71 lines
+mutex_test_sanitized - Average Time: 401925724 nanoseconds, Total Time: 1607702897 nanoseconds, Average Lines Written: 40 lines
+locking_example_sanitized - Average Time: 464736824 nanoseconds, Total Time: 1858947296 nanoseconds, Average Lines Written: 34 lines
+mini_bench_local_sanitized - Average Time: 13779822959 nanoseconds, Total Time: 55119291838 nanoseconds, Average Lines Written: 80417 lines
+start_many_threads_sanitized - Average Time: 449005205 nanoseconds, Total Time: 1796020820 nanoseconds, Average Lines Written: 504 lines
+mini_bench_shared_sanitized - Average Time: 14772432203 nanoseconds, Total Time: 59089728812 nanoseconds, Average Lines Written: 80666 lines

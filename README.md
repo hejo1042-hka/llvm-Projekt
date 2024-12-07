@@ -47,12 +47,12 @@ Some improvements were made to the original code from Martin Glauner and Julian 
 The idea here is to check, how much longer it takes TSan to run a programm, when the source code location is printed with the whole path to the file compared to when only a short number (hash) is printed. To test the runtime improvement with a hash of the source location, a fixed number (123) was used.
 
 To get an average time each tested program was run 4 times. The tested programs where:
-- [tiny_race](examples/tiny_race.cc)
-- [mutex_test](examples/tiny_race.cc)
-- [locking_example](examples/locking_example.cc)
-- [mini_bench_local](examples/mini_bench_local.cpp)
-- [start_many_threads](examples/start_many_threads.cpp)
-- [mini_bench_shared](examples/mini_bench_shared.cpp)
+- [tiny_race](examples/tiny_race.cc) This program simulates a very simple race. Where three Threads write to the same variable and also read from that variable.
+- [mutex_test](examples/tiny_race.cc) This program test, that mutex locks and unlocks are correctly identified. To do that 3 Threads are created and try to get a mutex lock do something and the unlock it.
+- [locking_example](examples/locking_example.cc) In this program one Thread writes two variables and the other Thread uses them to calculate something. In order to do that some mutex operation are used. Thou the usage of the mutex operations still allows for race conditions.
+- [mini_bench_local](examples/mini_bench_local.cpp) One of the official TSAN test programs. This program creates 4 threads and then each thread writes 100 times 100 numbers to an array. Every Thread access only its own set of positions in the array.
+- [start_many_threads](examples/start_many_threads.cpp) One of the official TSAN test programs. This program creates 100 Threads and then joins all of them again.
+- [mini_bench_shared](examples/mini_bench_shared.cpp) One of the official TSAN test programs. This program creates 4 threads and then each Thread reads 100 times 100 numbers from a shared array. Every Thread can access every position.
 
 The exact results of the test runs can be found in the file [result.md](examples/measurement/result.md). The measurements resulted only in a very minor increase of runtime, when only a fixed number was printed instead of the whole source location. In both cases, the source location has to be calculated, in one case only the printed statement is shorter. To account for the fact, that even when a hash of the position is printed, the location itself has to be calculated, the part of the code, that calculates the source code position was executed. This code fragment can be found in [tsan_report.cpp line 128](compiler-rt/lib/tsan/rtl/tsan_report.cpp) and in [tsan_report.cpp line 156](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
 
