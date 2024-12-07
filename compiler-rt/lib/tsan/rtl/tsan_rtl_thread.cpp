@@ -130,7 +130,7 @@ Tid ThreadCreate(ThreadState *thr, uptr pc, uptr uid, bool detached) {
   }
   Tid tid = ctx->thread_registry.CreateThread(uid, detached, parent, &arg);
   DPrintf("#%d: ThreadCreate tid=%d uid=%zu\n", parent, tid, uid);
-  #ifdef LOG_THREAD_FORK
+  #ifdef LOG_THREAD_FORK // TRACER
   // only log "real" forks and skip the fork of our main Thread from the system
   if (thr) {
     PrintFileAndLineForThread(thr, pc, "fork", tid);
@@ -305,7 +305,7 @@ struct JoinArg {
 void ThreadJoin(ThreadState *thr, uptr pc, Tid tid) {
   CHECK_GT(tid, 0);
   DPrintf("#%d: ThreadJoin tid=%d\n", thr->tid, tid);
-  #ifdef LOG_THREAD_JOIN
+  #ifdef LOG_THREAD_JOIN // TRACER
     PrintFileAndLineForThread(thr, pc, "join", tid);
   #endif
   JoinArg arg = {};

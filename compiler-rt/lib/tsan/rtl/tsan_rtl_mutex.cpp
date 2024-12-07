@@ -68,7 +68,7 @@ static void ReportMutexMisuse(ThreadState *thr, uptr pc, ReportType typ,
 
 static void RecordMutexLock(ThreadState *thr, uptr pc, uptr addr,
                             StackID stack_id, bool write) {
-  #ifdef LOG_MUTEX_LOCK_UNLOCK
+  #ifdef LOG_MUTEX_LOCK_UNLOCK // TRACER
     PrintFileAndLine(thr, pc, "acq", addr);
   #endif
   auto typ = write ? EventType::kLock : EventType::kRLock;
@@ -219,7 +219,7 @@ void MutexPostLock(ThreadState *thr, uptr pc, uptr addr, u32 flagz, int rec) {
 
 int MutexUnlock(ThreadState *thr, uptr pc, uptr addr, u32 flagz) {
   DPrintf("#%d: MutexUnlock %zx flagz=0x%x\n", thr->tid, addr, flagz);
-  #ifdef LOG_MUTEX_LOCK_UNLOCK
+  #ifdef LOG_MUTEX_LOCK_UNLOCK // TRACER
     PrintFileAndLine(thr, pc, "rel", addr);
   #endif
 
