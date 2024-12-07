@@ -70,6 +70,8 @@ The logged operation of the tracer are the same for the three options No Source 
 | **start_many_threads** |         10.427.980 |          69.409.787 |        449.005.205 |                 824.144.521 |           823.809.125 |                      504 |                                    0 |
 | **mini_bench_shared**  |          3.839.314 |          39.668.881 |     14.772.432.203 |              14.181.331.147 |        14.501.687.818 |                   80.684 |                                    0 |
 
+### Example Tracer output
+An example tracer output can be found in the file [log_file_tiny_race.txt](examples/log_file_tiny_race.txt)
 
 ## How to use it
 
