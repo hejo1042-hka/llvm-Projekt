@@ -424,11 +424,11 @@ ALWAYS_INLINE USED void MemoryAccess(ThreadState* thr, uptr pc, uptr addr,
   RawShadow* shadow_mem = MemToShadow(addr);
 
   if (typ == kAccessWrite) {
-  #ifdef LOG_THREAD_ON_WRITE // TRACER
+  #ifdef LOG_THREAD_ON_WRITE // ProjektTracer
     PrintFileAndLine(thr, pc, "wr", addr);
   #endif
   } else if (typ == kAccessRead) {
-  #ifdef LOG_THREAD_ON_READ // TRACER
+  #ifdef LOG_THREAD_ON_READ // ProjektTracer
     PrintFileAndLine(thr, pc, "rd", addr);
   #endif
   }

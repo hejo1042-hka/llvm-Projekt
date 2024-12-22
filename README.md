@@ -1,6 +1,33 @@
 # TSan Projektarbeit
 
-This is the documentation for the Projektarbeit "ThreadSanitizer - Trace Generierung zwecks Offline Analyse". The foundation for this work, was already created by Martin Glauner and Julian Aßmann and can be found [here](https://github.com/martinglauner/llvm-project).
+This is the documentation for the Projektarbeit "ThreadSanitizer - Trace Generierung zwecks Offline Analyse".
+In this project the goal is to log every Read and Write Memory Access, as well as all Mutex Operations and Thread Fork and Join Operations.
+With this logged operations in a later project the Trace can be analysed.
+In order to create this Trace the TSAN Project, that is part of the llvm Project was used.
+The foundation for this work, was already created by Martin Glauner and Julian Aßmann and can be found [here](https://github.com/martinglauner/llvm-project).
+
+## Table of Contents
+1. Starting Situation
+2. update to current llvm version
+3. further improvements
+4. analyze runtime
+5. Outlook
+6. How to use it
+
+In the Starting Situation a short description of what was already done by Martin Glauner and Julian Aßmann is provided.
+The sections update to current llvm version and further improvements explain what was done with the foundation provided from Martin Glauner and Julian Aßmann. First their code was updated to the current version of llvm and after that some further improvements were made. For example a new format for the log messages.
+After that the runtime of the trace generation was examined. For that different setups of what things were logged and how they were logged were tested. 
+The section Outlook provides information on what further improvements can be done. And all the things that were not done in this project.
+In the final section you can find some information on how to use this project in your own program.
+The original code from Martin Glauner and Julian Aßmann can be found [here](https://github.com/martinglauner/llvm-project).
+
+## Starting Situation
+Martin Glauner and Julian Aßmann already provided the foundation for this work. They already identified the code positions, where the log messages need to be located.
+They added log messages for read and write memory access, Thread Forks and Joins and for Mutex lock and unlock Operations.
+Furthermore, they created a method to write log messages, with the executed operation to the console output.
+The two also added an optional vector clock, that was updated depending on the logged operations.
+Finally, Martin Glauner and Julian Aßmann provided a few example programs, to test their implementation.
+
 
 ## update to current llvm version
 The first part of the current project was to update the code of Martin Glauner and Julian Aßmann to the current llvm-project state. That was necessary because in the time after they finished their project and the current time, some updates happened. Especially the update of the virtual memory address randomization, that now uses more bits than at the time of the project from Martin Glauner and Julian Aßmann. Since TSan is using these addresses, but was not updated to the most recent version it could not work with the longer randomized addresses. More information to this problem can be found [here](https://github.com/google/sanitizers/issues/1716) and [here](https://stackoverflow.com/questions/77850769/fatal-threadsanitizer-unexpected-memory-mapping-when-running-on-linux-kernels).
@@ -54,7 +81,7 @@ To get an average time each tested program was run 4 times. The tested programs 
 - [start_many_threads](examples/start_many_threads.cpp) One of the official TSAN test programs. This program creates 100 Threads and then joins all of them again.
 - [mini_bench_shared](examples/mini_bench_shared.cpp) One of the official TSAN test programs. This program creates 4 threads and then each Thread reads 100 times 100 numbers from a shared array. Every Thread can access every position.
 
-The exact results of the test runs can be found in the file [result.md](examples/measurement/result.md). The measurements resulted only in a very minor increase of runtime, when only a fixed number was printed instead of the whole source location. In both cases, the source location has to be calculated, in one case only the printed statement is shorter. To account for the fact, that even when a hash of the position is printed, the location itself has to be calculated, the part of the code, that calculates the source code position was executed. This code fragment can be found in [tsan_report.cpp line 128](compiler-rt/lib/tsan/rtl/tsan_report.cpp) and in [tsan_report.cpp line 156](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
+The exact results of the test runs can be found in the table below. The measurements resulted only in a very minor increase of runtime, when only a fixed number was printed instead of the whole source location. In both cases, the source location has to be calculated, in one case only the printed statement is shorter. To account for the fact, that even when a hash of the position is printed, the location itself has to be calculated, the part of the code, that calculates the source code position was executed. This code fragment can be found in [tsan_report.cpp line 128](compiler-rt/lib/tsan/rtl/tsan_report.cpp) and in [tsan_report.cpp line 156](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
 In the table below the results of the different test cases can be seen. When TSAN is enabled, the execution takes a significant time longer. That is to be expected, because every memory access, Thread operation and mutex operation must be recorded for the analysis. For the programs tiny_race, mutex_test and locking_example, there was only a minor increase in the execution time between the default TSAN output and the Tracer output without a source location. That is because for those three programs only a few operations need to be logged, and only a few operations are executed. All three programs are rather short. For the three programs mini_bench_local, start_many_threads and mini_bench_shared the execution times increase significantly. That is because a lot of operations need to be logged. And another reason here is, that each operation that shall be logged is immediately written to a file. In the sum of the operations relevant here, that takes a lot of time. When now also the source location shall be written to the log file another increase in execution time can be observed. That is, because in oder to determine the source location, a virtual call stack needs to be consulted, to load and traverse this call stack takes additional time. The difference between printing the exact source location and only a hash of it, can be neglected.
 
 The logged operation of the tracer are the same for the three options No Source Location, Fixed Source Location (123), Exact Source Location. When TSAN is disabled, no Operations are logged at all. The default TSAN output does also log some operations and other information. But the default TSAN only writes a log file, when an actual race happens. The three test programs mini_bench_local, start_many_threads ,mini_bench_shared do not produce an actual race. Instead, those three programs are used by the official TSAN test, to check the execution time of TSAN. Because those three programms don't produce an actual race, the default TSAN output logs 0 lines.
@@ -73,47 +100,52 @@ The logged operation of the tracer are the same for the three options No Source 
 ### Example Tracer output
 An example tracer output can be found in the file [log_file_tiny_race.txt](examples/log_file_tiny_race.txt)
 
+## Outlook
+Currently, all Mutex operations are treated the same. They are handled in the same two methods and depending on a lock or unlock operation a different log message is written.
+That means that there is no different log message whether it is a read or a write Mutex Lock or Unlock.
+This is done so because no matter if it is a read or write lock, one common method RecordMutexLock is called. In order to differentiate between Read and Write locks, the log message needs to be printed earlier. For example in the methods MutexPreReadLock and MutexReadUnlock.
+Then it would be possible to distinguish between read and write mutex (un)locks.
+
 ## How to use it
 
-## Requirements
+### Requirements
 
-- CMAKE 3.13.4 or higher
-- One of the following OS:
-    - Android (aarch64, x86_64)
-    - Darwin (arm64, x86_64)
-    - FreeBSD (64-bit)
-    - Linux (aarch64, x86_64, powerpc64, powerpc64le)
-    - NetBSD (64-bit)
+- CMAKE 3.20.0 or higher
+- The following OS:
+    - Linux (x86_64) (ubuntu 24.04.01)
 
-## Build
+### Build
 
 1. Clone this project
 2. `mkdir build && cd build`
-3. `cmake -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_ENABLE_PROJECTS="clang;compiler-rt;" -DCMAKE_BUILD_TYPE=Release ../llvm`
+3. Configure what events you want to log in the file [log.h](compiler-rt/lib/tsan/rtl/log.h), by commenting in and out the corresponding line.
+4. `cmake -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_ENABLE_PROJECTS="clang;compiler-rt;" -DCMAKE_BUILD_TYPE=Release ../llvm`
    This will build clang and the runtime libraries including the ThreadSanitizer project.
-   This will probably take a while.
-   For debug puprposes use `CMAKE_BUILD_TYPE=Debug`
-4. `cmake --build . -jn`  to build with `n` cores.
-5. (optional) `make check-tsan` to build and run tests for TSan
+   This will probably take a while. Most likely only a few minutes.
+   1. For debug purposes you can build it using `CMAKE_BUILD_TYPE=Debug`
+   2. Depending on your used architecture and OS you might need to replace `-DLLVM_TARGETS_TO_BUILD=X86`
+5. `cmake --build . -jn`  to build with `n` cores.
+   1. This will probably take a while. In my case for the first time it took about 4 to 5 hours.
+   2. Future build runs will be far quicker, because llvm only (re)builds the parts of the project that actually changed. (This is only relevant if you want to change things in the configuration)
+6. (optional) `make check-tsan` to build and run tests for TSan
 
 More information about llvm and the build flags can be found [here](https://llvm.org/docs/GettingStarted.html#requirements).
 
-## Usage
+### Compile with TSAN
 
 In order to compile your program with TSan enabled, you have two options.
 
-### CMake
+#### CMake
 
 1. Add the following to the cmake file of your program:
 
     ```cmake
     set(CMAKE_CXX_COMPILER "path/to/your/llvm/project/build/bin/clang++")
 
-    add_link_options(-fsanitize=thread)
-
     add_executable(program_name your_program.cc)
     add_executable(program_name_sanitized  your_programm.cc)
-    set_target_properties(program_name_sanitized PROPERTIES COMPILE_FLAGS "-fsanitize=thread -fPIE -pie -g -O1")
+    set_target_properties(program_name_sanitized PROPERTIES COMPILE_FLAGS "-fsanitize=thread -g -O0")
+    target_link_options(program_name_sanitized PRIVATE -fsanitize=thread)
     ```
 
 2. `mkdir build && cd build`
