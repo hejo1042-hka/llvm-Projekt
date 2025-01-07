@@ -112,6 +112,7 @@ Currently, all Mutex operations are treated the same. They are handled in the sa
 That means that there is no different log message whether it is a read or a write Mutex Lock or Unlock.
 This is done so because no matter if it is a read or write lock, one common method RecordMutexLock is called. In order to differentiate between Read and Write locks, the log message needs to be printed earlier. For example in the methods MutexPreReadLock and MutexReadUnlock.
 Then it would be possible to distinguish between read and write mutex (un)locks.
+Since TSan also supports GO, it is possible to log all that are currently logged for a C program also for a GO program. In order to do that, TSan needs to be compiled for GO and the necessary log messages need to be actually implemented in the GO-if-branch. The necessary position are currently marked with a print statement that states: "Not implemented for Go".
 
 ## How to use it
 
