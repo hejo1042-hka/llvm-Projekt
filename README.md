@@ -72,30 +72,98 @@ Some improvements were made to the original code from Martin Glauner and Julian 
 ## analyze runtime 
 
 The idea here is to check, how much longer it takes TSan to run a programm, when the source code location is printed with the whole path to the file compared to when only a short number (hash) is printed. To test the runtime improvement with a hash of the source location, a fixed number (123) was used. The following logging configurations were tested:
-- TSAN disabled: This is the program compiled without TSAN. This is how you would run the program normally. This only here to show how much more time TSAN takes compared to the program compiled normally.
-- Default TSAN: This is the default TSAN output. This output is only triggered, when an actual race was detected while running the sanitized program.
-- Tracer with no Source location: This is the updated TSAN implementation which logs all Thread forks, joins, Memory reads and writes and all Mutex locks and unlocks. In this configuration no source location is written. That means, that it is not shown in the output from where in the programm this operation was called.
-- Tracer with short source location: In this case the location in the program from wehre this operation was called is logged. But this location is already hashed, so less characters need to be printe dto the console. To test this a hashfunction was used, that always returns 123.
-- Tracer with Exact source location: In this configuration the exact source location is printed to the logfile. That means a string like 'path/to/the/file/name.cc:15' is written to the logfile as source location. 
+- TSAN_Disabled: This is the program compiled without TSAN. This is how you would run the program normally. This only here to show how much more time TSAN takes compared to the program compiled normally.
+- TSAN_Default: This is the default TSAN output. This output is only triggered, when an actual race was detected while running the sanitized program.
+- TSAN_Tracer_no_Source_location: This is the updated TSAN implementation which logs all Thread forks, joins, Memory reads and writes and all Mutex locks and unlocks. In this configuration no source location is written. That means, that it is not shown in the output from where in the programm this operation was called.
+- TSAN_Tracer_hash_source_location: In this case the location in the program from wehre this operation was called is logged. But this location is already hashed, so less characters need to be printe dto the console. To test this a hash function was used, that always returns 123.
+- TSAN_Tracer_Exact_source_location: In this configuration the exact source location is printed to the logfile. That means a string like 'path/to/the/file/name.cc:15' is written to the logfile as source location. 
 
 To get an average time each tested program was run 4 times. The tested programs where:
 - [tiny_race](examples/tiny_race.cc) This program simulates a very simple race. Where three Threads write to the same variable and also read from that variable.
-- [mutex_test](examples/tiny_race.cc) This program test, that mutex locks and unlocks are correctly identified. To do that 3 Threads are created and try to get a mutex lock do something and the unlock it.
+- [mutex_test](examples/tiny_race.cc) This program test, that mutex locks and unlocks are correctly identified. To do that 3 Threads are created and try to get a mutex lock do something and then unlock it.
 - [locking_example](examples/locking_example.cc) In this program one Thread writes two variables and the other Thread uses them to calculate something. In order to do that some mutex operation are used. Thou the usage of the mutex operations still allows for race conditions.
-- [mini_bench_local](examples/mini_bench_local.cpp) One of the official TSAN test programs. This program creates 4 threads and then each thread writes 100 times 100 numbers to an array. Every Thread access only its own set of positions in the array.
-- [start_many_threads](examples/start_many_threads.cpp) One of the official TSAN test programs. This program creates 100 Threads and then joins all of them again.
-- [mini_bench_shared](examples/mini_bench_shared.cpp) One of the official TSAN test programs. This program creates 4 threads and then each Thread reads 100 times 100 numbers from a shared array. Every Thread can access every position.
+- [mini_bench_local](examples/mini_bench_local.cpp) One of the official TSAN test programs. This program creates 4 threads and then each thread writes 100 times 100 numbers to an array. Every Thread access only its own set of positions in the array. Here is a section of the logged operations: 
+``` 
+  ...
+  T0|fork(T1)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+  T1|rd(0x555556a7eba8)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_local.cpp:14
+  T1|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_local.cpp:15
+  T0|fork(T2)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+  T1|wr(0x726c00000000)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_local.cpp:15
+  T1|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_local.cpp:15
+  T2|rd(0x555556a7eba8)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_local.cpp:14
+  T2|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_local.cpp:15
+  T0|fork(T3)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+  ...
+  T0|join(T2)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1098
+  ...
+```
+- [start_many_threads](examples/start_many_threads.cpp) One of the official TSAN test programs. This program creates 100 Threads and then joins all of them again. Here is a section of the logged operations:
+```
+...
+T0|fork(T98)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T98|rd(0x555556a7eba8)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1604
+T0|fork(T99)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T99|rd(0x555556a7eba8)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1604
+T0|fork(T100)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+...
+T0|join(T22)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1098
+T0|rd(0x725c000000b0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/start_many_threads.cpp:46
+T0|join(T23)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1098
+...
+```
+- [mini_bench_shared](examples/mini_bench_shared.cpp) One of the official TSAN test programs. This program creates 4 threads and then each Thread reads 100 times 100 numbers from a shared array. Every Thread can access every position. Here is a section of the logged operations:
+```
+...
+T0|fork(T1)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T1|rd(0x555556a7eba8)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:14
+T0|fork(T2)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T1|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T1|rd(0x724c00000000)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+...
+T3|rd(0x724c0000007c)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T2|rd(0x724c00000050)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T3|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T2|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T3|rd(0x724c00000080)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T2|rd(0x724c00000054)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T3|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+T2|rd(0x555556a7ebb0)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:15
+...
+T0|join(T3)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1098
+T0|rd(0x720800000018)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/mini_bench_shared.cpp:48
+T0|join(T4)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1098
+...
+```
+- [many_mutexes_bench](examples/many_mutexes_bench.cpp) This test program creates one mutex. After that 100 Threads are started. Each Thread runs a loop for 100 times. In this loop the Thread takes the mutex (This one mutex is shared between all 100 Threads) then reads a value from an array and unlocks the mutex. Since this is in a loop that happens 100 times for 100 Threads. Here is a section of the logged operations:
+```
+...
+T0|fork(T1)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T1|acq(0x555556a7eb68)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1371
+T0|fork(T2)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T0|fork(T3)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T1|rd(0x555556a7eb90)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/many_mutexes_bench.cpp:14
+T1|rd(0x724c00000000)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/many_mutexes_bench.cpp:14
+T1|rel(0x555556a7eb68)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1405
+...
+T1|acq(0x555556a7eb68)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1371
+T1|rd(0x555556a7eb90)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/many_mutexes_bench.cpp:14
+T0|fork(T16)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1041
+T1|rd(0x724c00000024)|/home/user/Dokumente/Projekt2/llvm-Projekt/examples/many_mutexes_bench.cpp:14
+T1|rel(0x555556a7eb68)|/home/user/Dokumente/Projekt2/llvm-Projekt/compiler-rt/lib/tsan/rtl/tsan_interceptors_posix.cpp:1405
+...
+```
 
-### Execution Time Measurements (Average Time in Nanoseconds)
+### Execution Time Measurements (All Times in Nanoseconds)
 
-| Test Case              | With TSAN Disabled | Default TSAN Output | No Source Location | Short Source Location (123) | Exact Source Location | Logged Operations Tracer | Logged Mutex operations | Logged Memory accesses | Logged Thread operations | Logged Lines for Default TSAN Output |
-|------------------------|-------------------:|--------------------:|-------------------:|----------------------------:|----------------------:|-------------------------:|------------------------:|-----------------------:|-------------------------:|-------------------------------------:|
-| **tiny_race**          |      1.010.253.859 |       1.460.940.819 |      1.482.788.721 |               1.825.988.269 |         1.832.168.491 |                       71 |                       0 |                     68 |                        4 |                                   67 |
-| **mutex_test**         |          5.785.554 |         390.576.568 |        401.925.724 |                 723.422.837 |           740.302.229 |                       40 |                       6 |                     30 |                        4 |                                   36 |
-| **locking_example**    |          5.375.015 |         445.588.896 |        464.736.824 |                 820.420.049 |           838.791.299 |                       34 |                       4 |                     26 |                        4 |                                   46 |
-| **mini_bench_local**   |          6.499.689 |          39.493.128 |     13.779.822.959 |              14.138.933.685 |        14.239.088.413 |                   80.417 |                       0 |                 80.409 |                        8 |                                    0 |
-| **start_many_threads** |         10.427.980 |          69.409.787 |        449.005.205 |                 824.144.521 |           823.809.125 |                      504 |                       0 |                    304 |                      200 |                                    0 |
-| **mini_bench_shared**  |          3.839.314 |          39.668.881 |     14.772.432.203 |              14.181.331.147 |        14.501.687.818 |                   80.684 |                       0 |                 80.676 |                        8 |                                    0 |
+| Test Case              | TSAN_Disabled |  TSAN_Default | TSAN_Tracer_no_Source_location | TSAN_Tracer_hash_source_location | TSAN_Tracer_Exact_source_location | Logged Operations Tracer | Logged Mutex operations | Logged Memory accesses | Logged Thread operations |
+|------------------------|--------------:|--------------:|-------------------------------:|---------------------------------:|----------------------------------:|-------------------------:|------------------------:|-----------------------:|-------------------------:|
+| **tiny_race**          | 1.010.253.859 | 1.460.940.819 |                  1.482.788.721 |                    1.825.988.269 |                     1.832.168.491 |                       71 |                       0 |                     68 |                        4 |
+| **mutex_test**         |     5.785.554 |   390.576.568 |                    401.925.724 |                      723.422.837 |                       740.302.229 |                       40 |                       6 |                     30 |                        4 |
+| **locking_example**    |     5.375.015 |   445.588.896 |                    464.736.824 |                      820.420.049 |                       838.791.299 |                       34 |                       4 |                     26 |                        4 |
+| **mini_bench_local**   |     6.499.689 |    39.493.128 |                 13.779.822.959 |                   14.138.933.685 |                    14.239.088.413 |                   80.417 |                       0 |                 80.409 |                        8 |
+| **start_many_threads** |    10.427.980 |    69.409.787 |                    449.005.205 |                      824.144.521 |                       823.809.125 |                      504 |                       0 |                    304 |                      200 |
+| **mini_bench_shared**  |     3.839.314 |    39.668.881 |                 14.772.432.203 |                   14.181.331.147 |                    14.501.687.818 |                   80.684 |                       0 |                 80.676 |                        8 |
 
 The exact results of the test runs can be found in the table above. The measurements resulted only in a very minor increase of runtime, when only a fixed number was printed instead of the whole source location. In both cases, the source location has to be calculated, in one case only the printed statement is shorter. To account for the fact, that even when a hash of the position is printed, the location itself has to be calculated, the part of the code, that calculates the source code position was executed. This code fragment can be found in [tsan_report.cpp line 128](compiler-rt/lib/tsan/rtl/tsan_report.cpp) and in [tsan_report.cpp line 156](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
 In the table below the results of the different test cases can be seen. When TSAN is enabled, the execution takes a significant time longer. That is to be expected, because every memory access, Thread operation and mutex operation must be recorded for the analysis. For the programs tiny_race, mutex_test and locking_example, there was only a minor increase in the execution time between the default TSAN output and the Tracer output without a source location. That is because for those three programs only a few operations need to be logged, and only a few operations are executed. All three programs are rather short. For the three programs mini_bench_local, start_many_threads and mini_bench_shared the execution times increase significantly. That is because a lot of operations need to be logged. And another reason here is, that each operation that shall be logged is immediately written to a file. In the sum of the operations relevant here, that takes a lot of time. When now also the source location shall be written to the log file another increase in execution time can be observed. That is, because in oder to determine the source location, a virtual call stack needs to be consulted, to load and traverse this call stack takes additional time. The difference between printing the exact source location and only a hash of it, can be neglected.
@@ -108,11 +176,21 @@ In the columns 'Logged Operations Tracer', 'Logged Mutex operations', 'Logged Me
 An example tracer output can be found in the file [log_file_tiny_race.txt](examples/log_file_tiny_race.txt)
 
 ## Outlook
-Currently, all Mutex operations are treated the same. They are handled in the same two methods and depending on a lock or unlock operation a different log message is written.
+Mutexes can typically distinguish between read and write (un)locks. Currently, all Mutex operations are logged as lock or unlock, without distinguishing between read and write (un)locks.
+They are handled in two methods, one for lock and one for unlock, depending on a lock or unlock operation the corresponding log message is written.
 That means that there is no different log message whether it is a read or a write Mutex Lock or Unlock.
-This is done so because no matter if it is a read or write lock, one common method RecordMutexLock is called. In order to differentiate between Read and Write locks, the log message needs to be printed earlier. For example in the methods MutexPreReadLock and MutexReadUnlock.
-Then it would be possible to distinguish between read and write mutex (un)locks.
-Since TSan also supports GO, it is possible to log all that are currently logged for a C program also for a GO program. In order to do that, TSan needs to be compiled for GO and the necessary log messages need to be actually implemented in the GO-if-branch. The necessary position are currently marked with a print statement that states: "Not implemented for Go".
+This is done so because no matter if it is a read or write lock, one common method RecordMutexLock is called. In order to differentiate between Read and Write locks, the log message needs to be printed earlier.
+
+The relevant code part is in the file [tsan_rtl_mutex.cpp](compiler-rt/lib/tsan/rtl/tsan_rtl_mutex.cpp), there are the methods: 
+- MutexPreReadLock
+- MutexReadUnlock 
+- MutexPreLock
+- MutexPostLock
+- MutexReadOrWriteUnlock
+
+which can be used to differentiate between the read and write (un)locks. Currently, the log message for a Mutex (un)lock resides in the two methods MutexUnlock ans RecordMutexLock. These two methods are called from the methods listed above and serve as a common code point. In order to differentiate between read and write (un)locks the log message needs to be moved in the corresponding method instead of the common method (RecordMutexLock).
+
+Since TSan also supports GO, it is possible to log all that are currently logged for a C program also for a GO program. In order to do that  the necessary log messages need to be actually implemented in the GO-if-branch. The necessary position are currently marked with a print statement that states: "Not implemented for Go" and can be found in the file [tsan_report.cpp](compiler-rt/lib/tsan/rtl/tsan_report.cpp).
 
 ## How to use it
 

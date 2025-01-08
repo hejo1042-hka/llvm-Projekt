@@ -31,3 +31,8 @@ add_executable(mini_bench_shared mini_bench_shared.cpp)
 add_executable(mini_bench_shared_sanitized mini_bench_shared.cpp)
 set_target_properties(mini_bench_shared_sanitized PROPERTIES COMPILE_FLAGS "-fsanitize=thread -g -O0")
 target_link_options(mini_bench_shared_sanitized PRIVATE -fsanitize=thread)
+
+add_executable(many_mutexes_bench many_mutexes_bench.cpp)
+add_executable(many_mutexes_bench_sanitized many_mutexes_bench.cpp)
+set_target_properties(many_mutexes_bench_sanitized PROPERTIES COMPILE_FLAGS "-fsanitize=thread -g -O0")
+target_link_options(many_mutexes_bench_sanitized PRIVATE -fsanitize=thread)
