@@ -119,19 +119,29 @@ void PrintStack(const ReportStack *ent) {
 }
 
 void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const char* action, uptr addr) {
+#ifdef LOG_NO_SOURCE
+  Printf("T%d|%s(%p)\n", thr->tid, action, (void *)addr);
+#else
   if (ent == 0 || ent->frames == 0) {
     Printf("[failed to restore the stack]");
   }
   SymbolizedStack *frame = ent->frames;
   InternalScopedString res;
+#ifdef LOG_HASH_SOURCE
+  StackTracePrinter::GetOrInit()->RenderFrame(
+      &res, "%s:%l", 0, frame->info.address, &frame->info,
+              common_flags()->symbolize_vs_style,
+              common_flags()->strip_path_prefix);
 
+  Printf("T%d|%s(%p)|%s\n", thr->tid, action, (void *)addr,  "123");
+#else
   StackTracePrinter::GetOrInit()->RenderFrame(
       &res, "%s:%l", 0, frame->info.address, &frame->info,
               common_flags()->symbolize_vs_style,
               common_flags()->strip_path_prefix);
 
   Printf("T%d|%s(%p)|%s\n", thr->tid, action, (void *)addr,  res.data());
-
+#endif
 #ifdef LOG_CALL_STACK
   frame = frame->next;
   for (int i = 1; frame && frame->info.address; frame = frame->next, i++) {
@@ -143,23 +153,34 @@ void PrintFileAndLineOfStack(const ReportStack *ent, ThreadState *thr, const cha
     Printf("\t\t%s\n", internal_res.data());
   }
 #endif
+#endif
 }
 
 void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr,
                                       const char* action, Tid thread) {
+#ifdef LOG_NO_SOURCE
+  Printf("T%d|%s(T%d)\n", thr->tid, action, thread);
+#else
   if (ent == 0 || ent->frames == 0) {
     Printf("[failed to restore the stack]");
   }
   SymbolizedStack *frame = ent->frames;
   InternalScopedString res;
+#ifdef LOG_HASH_SOURCE
+  StackTracePrinter::GetOrInit()->RenderFrame(
+      &res, "%s:%l", 0, frame->info.address, &frame->info,
+              common_flags()->symbolize_vs_style,
+              common_flags()->strip_path_prefix);
 
+  Printf("T%d|%s(T%d)|%s\n", thr->tid, action, thread, "123");
+#else
   StackTracePrinter::GetOrInit()->RenderFrame(
       &res, "%s:%l", 0, frame->info.address, &frame->info,
               common_flags()->symbolize_vs_style,
               common_flags()->strip_path_prefix);
 
   Printf("T%d|%s(T%d)|%s\n", thr->tid, action, thread, res.data());
-
+#endif
 #ifdef LOG_CALL_STACK
   frame = frame->next;
   for (int i = 1; frame && frame->info.address; frame = frame->next, i++) {
@@ -170,6 +191,7 @@ void PrintFileAndLineOfStackForThread(const ReportStack *ent, ThreadState *thr,
                 common_flags()->strip_path_prefix);
     Printf("\t\t%s\n", internal_res.data());
   }
+#endif
 #endif
 }
 

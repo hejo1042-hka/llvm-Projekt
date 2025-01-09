@@ -5,6 +5,7 @@ programs=(
     "mini_bench_local_sanitized"
     "start_many_threads_sanitized"
     "mini_bench_shared_sanitized"
+    "many_mutexes_bench_sanitized"
 )
 #programs=(
 #    "tiny_race"
@@ -13,6 +14,7 @@ programs=(
 #    "mini_bench_local"
 #    "start_many_threads"
 #    "mini_bench_shared"
+#    "many_mutexes_bench"
 #)
 
 number_runs=4

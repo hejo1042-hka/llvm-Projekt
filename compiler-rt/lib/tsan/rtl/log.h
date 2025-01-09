@@ -14,12 +14,17 @@
 #include "sanitizer_common/sanitizer_report_decorator.h"
 #include "sanitizer_common/sanitizer_stacktrace_printer.h"
 
+// Options for what should be logged
 // #define ENABLE_TSAN_DEFAULT_OUTPUT
 #define LOG_THREAD_ON_READ
 #define LOG_THREAD_ON_WRITE
 #define LOG_MUTEX_LOCK_UNLOCK
 #define LOG_THREAD_JOIN
 #define LOG_THREAD_FORK
+
+// LOG Message Format Options
 // #define LOG_CALL_STACK
+// #define LOG_NO_SOURCE
+// #define LOG_HASH_SOURCE
 
 #endif //TSAN_LOG_H
